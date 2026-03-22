@@ -44,5 +44,5 @@ screenshots/
 tmp/
 temp/
 *.tmp
-html/s
+html/
 test_scenario/
