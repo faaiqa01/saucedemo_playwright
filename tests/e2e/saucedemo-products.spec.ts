@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { SaucedemoLoginPage, SaucedemoInventoryPage } from '../../src/pages';
-import { getSaucedemoUserFixture, products, getProductByName, SortOptions } from '../../src/fixtures';
+import { SaucedemoInventoryPage } from '../../src/pages';
+import { products, getProductByName, SortOptions } from '../../src/fixtures';
+import { ensureLogin } from '../helpers/login.helper';
 
 /**
  * Saucedemo Products E2E Tests
@@ -15,18 +16,13 @@ import { getSaucedemoUserFixture, products, getProductByName, SortOptions } from
  */
 
 test.describe('Saucedemo Products Functionality', () => {
-    let loginPage: SaucedemoLoginPage;
     let inventoryPage: SaucedemoInventoryPage;
 
     test.beforeEach(async ({ page }) => {
-        loginPage = new SaucedemoLoginPage(page);
         inventoryPage = new SaucedemoInventoryPage(page);
 
-        // Arrange - Login as standard user
-        const user = getSaucedemoUserFixture('standard');
-        await loginPage.navigate();
-        await loginPage.performLogin(user.username, user.password);
-        await inventoryPage.verifyPage();
+        // Arrange - Login using login helper
+        await ensureLogin(page, 'standard');
     });
 
     /**

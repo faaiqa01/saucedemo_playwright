@@ -20,13 +20,25 @@ project-root/
 │   ├── config/          # Environment configuration
 │   ├── fixtures/        # Test data dan fixtures
 │   ├── pages/           # Page Object Model classes
-│   │   ├── BasePage.ts           # Base class untuk semua pages
-│   │   ├── SaucedemoLoginPage.ts  # Login page object
-│   │   └── SaucedemoInventoryPage.ts # Inventory page object
+│   │   ├── BasePage.ts                   # Base class untuk semua pages
+│   │   ├── SaucedemoLoginPage.ts          # Login page object
+│   │   ├── SaucedemoInventoryPage.ts     # Inventory page object
+│   │   ├── SaucedemoDetailProductPage.ts # Detail product page object
+│   │   ├── SaucedemoCartPage.ts         # Cart page object
+│   │   ├── SaucedemoCheckoutInfoPage.ts  # Checkout info page object
+│   │   ├── SaucedemoCheckoutOverviewPage.ts # Checkout overview page object
+│   │   └── SaucedemoCheckoutCompletePage.ts # Checkout complete page object
 │   └── utils/           # Utility functions
 ├── tests/
+│   ├── helpers/         # Helper functions dan setup
+│   │   ├── auth.setup.ts        # Authentication setup untuk storage state
+│   │   ├── login.helper.ts      # Login helper function
+│   │   └── index.ts
 │   └── e2e/            # E2E tests untuk Saucedemo
-│       └── saucedemo-login.spec.ts
+│       ├── saucedemo-login.spec.ts
+│       ├── saucedemo-products.spec.ts
+│       ├── saucedemo-detail-product.spec.ts
+│       └── saucedemo-checkout.spec.ts
 ├── playwright.config.ts # Playwright configuration
 ├── tsconfig.json       # TypeScript configuration
 ├── .env                # Environment variables
@@ -76,6 +88,8 @@ npm run test:saucedemo:webkit
 | `npm run test:saucedemo:chrome` | Run Saucedemo tests on Chromium |
 | `npm run test:saucedemo:firefox` | Run Saucedemo tests on Firefox |
 | `npm run test:saucedemo:webkit` | Run Saucedemo tests on WebKit |
+| `npm run test:saucedemo:setup` | Run authentication setup (generate storage state) |
+| `npm run test:saucedemo:auth` | Run tests with authenticated session |
 | `npm run test:ui` | Run tests with UI mode |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
@@ -85,7 +99,7 @@ npm run test:saucedemo:webkit
 
 ## 🧪 Test Coverage
 
-### Saucedemo Login Tests
+### Saucedemo Login Tests ([`saucedemo-login.spec.ts`](tests/e2e/saucedemo-login.spec.ts))
 
 Test suite untuk login functionality Saucedemo Swag Labs:
 
@@ -101,12 +115,51 @@ Test suite untuk login functionality Saucedemo Swag Labs:
 | TCL-008 | Validation error when password is empty | Negative |
 | TCL-009 | User cannot login with invalid password | Negative |
 
-### Additional Tests
+### Saucedemo Products Tests ([`saucedemo-products.spec.ts`](tests/e2e/saucedemo-products.spec.ts))
 
-- Login page elements are displayed correctly
-- Login button is enabled when form is valid
-- User can clear form fields
-- Products are displayed after successful login
+Test suite untuk products functionality Saucedemo Swag Labs:
+
+| Test ID | Test Case | Type |
+|---------|-----------|------|
+| TCP-001 | Display all products with complete information | Smoke |
+| TCP-002 | Add product to cart | Functional |
+| TCP-003 | Add multiple products to cart | Functional |
+| TCP-004 | Open sorting dropdown | UI/UX |
+| TCP-005 | Sort products by name A to Z | Functional |
+| TCP-006 | Sort products by name Z to A | Functional |
+| TCP-007 | Sort products by price low to high | Functional |
+| TCP-008 | Sort products by price high to low | Functional |
+| TCP-009 | Open sidebar menu | UI/UX |
+| TCP-010 | Navigate to All Items from sidebar | Functional |
+| TCP-011 | Navigate to About page | Functional |
+| TCP-012 | Logout from application | Functional |
+| TCP-013 | Reset app state | Regression |
+| TCP-014 | Cannot add same product twice | Functional |
+| TCP-015 | Validate product price format | UI/UX |
+| TCP-016 | Close sidebar | UI/UX |
+
+### Saucedemo Detail Product Tests ([`saucedemo-detail-product.spec.ts`](tests/e2e/saucedemo-detail-product.spec.ts))
+
+Test suite untuk detail product functionality Saucedemo Swag Labs:
+
+| Test ID | Test Case | Type |
+|---------|-----------|------|
+| TDP-001 | Navigate to product detail page from product list | Functional |
+| TDP-002 | Validate all elements on detail product page | Smoke |
+| TDP-003 | Add product to cart from detail page | Functional |
+| TDP-004 | Click add to cart button repeatedly on detail page | Functional |
+| TDP-005 | Navigate back to products page | Functional |
+| TDP-006 | Validate data consistency between list and detail | Regression |
+| TDP-007 | Validate product image display on detail page | UI/UX |
+| TDP-008 | Validate price format on detail page | UI/UX |
+| TDP-009 | Navigate using cart icon from detail page | Functional |
+| TDP-010 | Navigate using sidebar menu from detail page | Functional |
+| TDP-011 | Access detail page without selecting product (edge case) | Integration |
+| TDP-012 | Validate product description text is not empty | Functional |
+
+### Saucedemo Checkout Tests ([`saucedemo-checkout.spec.ts`](tests/e2e/saucedemo-checkout.spec.ts))
+
+Test suite untuk checkout functionality Saucedemo Swag Labs.
 
 ## 📚 Page Objects
 
@@ -192,25 +245,100 @@ SaucedemoErrorMessages.PASSWORD_REQUIRED
 SaucedemoErrorMessages.INVALID_CREDENTIALS
 ```
 
-## 🎯 Test Structure
+## 🔐 Authentication
 
-### AAA Pattern
+### Login Helper
 
-Semua test mengikuti Arrange-Act-Assert pattern:
+Helper function untuk login yang bisa digunakan di `beforeEach` hook:
 
 ```typescript
-test('TCL-001: user can login with standard user credentials', async ({ page }) => {
-    // Arrange
-    const user = getSaucedemoUserFixture('standard');
+import { ensureLogin } from '../helpers/login.helper';
 
-    // Act
-    await loginPage.performLogin(user.username, user.password);
-
-    // Assert
-    await inventoryPage.verifyPage();
-    await expect(page).toHaveURL(/.*inventory.html/);
+test.beforeEach(async ({ page }) => {
+    // Login using helper - akan skip login jika sudah authenticated
+    await ensureLogin(page, 'standard');
 });
 ```
+
+**Available User Types:**
+- `'standard'` - Standard user with valid credentials
+- `'locked'` - Locked out user
+- `'problem'` - User with visual/product issues
+- `'performance'` - User with performance delay
+- `'error'` - User that triggers errors
+- `'visual'` - User with different UI layout
+- `'invalidPassword'` - Valid username with invalid password
+- `'emptyUsername'` - Empty username with valid password
+- `'emptyPassword'` - Valid username with empty password
+
+**Available Helper Functions:**
+- `ensureLogin(page, userType)` - Ensure user is logged in (skip if already authenticated)
+- `navigateToInventory(page)` - Navigate to inventory page with auto-login
+- `isAuthenticated(page)` - Check if user is authenticated
+- `logout(page)` - Perform logout
+
+### Auth Setup
+
+Auth setup untuk generate storage state yang digunakan oleh project `saucedemo-authenticated`:
+
+```typescript
+// File: tests/helpers/auth.setup.ts
+setup('authenticate as standard user', async ({ page, context }) => {
+    // Login ke aplikasi
+    const user = getSaucedemoUserFixture('standard');
+    const loginPage = new SaucedemoLoginPage(page);
+    await loginPage.navigate();
+    await loginPage.performLogin(user.username, user.password);
+    
+    // Simpan storage state (cookies, localStorage, sessionStorage)
+    await context.storageState({ path: 'tests/.auth/saucedemo-user.json' });
+});
+```
+
+**Cara Menggunakan Authenticated Project:**
+
+```bash
+# Jalankan setup terlebih dahulu untuk generate storage state
+npm run test:saucedemo:setup
+
+# Jalankan test dengan authenticated session
+npm run test:saucedemo:auth
+```
+
+## 🎯 Test Structure
+
+### AAA Pattern dengan Login Helper
+
+Semua test mengikuti Arrange-Act-Assert pattern dengan menggunakan login helper:
+
+```typescript
+test.describe('Saucedemo Products Functionality', () => {
+    let inventoryPage: SaucedemoInventoryPage;
+
+    test.beforeEach(async ({ page }) => {
+        inventoryPage = new SaucedemoInventoryPage(page);
+
+        // Arrange - Login using login helper
+        await ensureLogin(page, 'standard');
+    });
+
+    test('TCP-001: display all products with complete information', async () => {
+        // Act - Get all products
+        const productCount = await inventoryPage.getProductCount();
+        const productTitles = await inventoryPage.getProductTitles();
+
+        // Assert - Verify all products are displayed
+        await expect(productCount).toBe(products.length);
+        await expect(productTitles).toHaveLength(products.length);
+    });
+});
+```
+
+**Keuntungan Menggunakan Login Helper:**
+- ✅ Mengurangi boilerplate code di setiap test file
+- ✅ Konsistensi - semua test menggunakan mekanisme login yang sama
+- ✅ Maintainability - perubahan logika login hanya di satu tempat
+- ✅ Reusability - fungsi `ensureLogin` dapat digunakan di berbagai test file
 
 ## 🔧 Configuration
 
@@ -236,6 +364,10 @@ CI=false
 
 ### Saucedemo Projects
 
+**saucedemo-chromium / saucedemo-firefox / saucedemo-webkit**
+
+Project untuk menjalankan test Saucedemo di berbagai browser:
+
 ```typescript
 {
     name: 'saucedemo-chromium',
@@ -243,6 +375,34 @@ CI=false
     use: {
         ...devices['Desktop Chrome'],
         baseURL: 'https://www.saucedemo.com',
+    },
+}
+```
+
+**saucedemo-setup**
+
+Project untuk generate storage state (authentication setup):
+
+```typescript
+{
+    name: 'saucedemo-setup',
+    testMatch: /.*helpers\/.*\.setup\.ts/,
+}
+```
+
+**saucedemo-authenticated**
+
+Project untuk menjalankan test dengan authenticated session (menggunakan storage state):
+
+```typescript
+{
+    name: 'saucedemo-authenticated',
+    testMatch: /.*saucedemo.*/,
+    dependencies: ['saucedemo-setup'],
+    use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.saucedemo.com',
+        storageState: 'tests/.auth/saucedemo-user.json',
     },
 }
 ```

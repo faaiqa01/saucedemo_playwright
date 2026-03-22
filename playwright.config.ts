@@ -12,6 +12,9 @@ import path from 'path';
  * - Retry mechanism untuk flaky tests
  */
 export default defineConfig({
+    // Global setup untuk authentication
+    globalSetup: require.resolve('./global-setup'),
+
     // Test directory
     testDir: './tests',
 
@@ -123,6 +126,27 @@ export default defineConfig({
             use: {
                 ...devices['Desktop Safari'],
                 baseURL: 'https://www.saucedemo.com',
+            },
+        },
+
+        // Setup project untuk generate storage state (manual trigger)
+        // Jalankan ini terlebih dahulu di UI Playwright untuk generate auth
+        {
+            name: 'saucedemo-setup',
+            testMatch: /.*helpers\/.*\.setup\.ts/,
+        },
+
+        // Saucedemo authenticated configuration (dengan storage state)
+        // Pastikan saucedemo-setup sudah dijalankan sebelum menjalankan test ini
+        {
+            name: 'saucedemo-authenticated',
+            testMatch: /.*saucedemo.*/,
+            dependencies: ['saucedemo-setup'],
+            use: {
+                ...devices['Desktop Chrome'],
+                baseURL: 'https://www.saucedemo.com',
+                // Gunakan storage state yang sudah disimpan
+                storageState: 'tests/.auth/saucedemo-user.json',
             },
         },
     ],

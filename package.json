@@ -20,6 +20,8 @@
     "test:saucedemo:chrome": "playwright test --project=saucedemo-chromium",
     "test:saucedemo:firefox": "playwright test --project=saucedemo-firefox",
     "test:saucedemo:webkit": "playwright test --project=saucedemo-webkit",
+    "test:saucedemo:setup": "playwright test --project=saucedemo-setup",
+    "test:saucedemo:auth": "playwright test --project=saucedemo-authenticated",
     "install:browsers": "playwright install",
     "install:chrome": "playwright install chromium",
     "install:firefox": "playwright install firefox",

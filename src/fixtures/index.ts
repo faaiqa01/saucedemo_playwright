@@ -6,3 +6,4 @@
 
 export * from './saucedemo.fixture';
 export * from './product.fixture';
+export * from './checkout.fixture';

@@ -9,6 +9,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+# Authentication state (contains sensitive cookies)
+tests/.auth/
+
 # Environment files
 .env
 .env.local
@@ -47,3 +50,4 @@ temp/
 html
 test_scenario/
 .roo
+lain
