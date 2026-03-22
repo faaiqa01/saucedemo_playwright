@@ -24,7 +24,15 @@ project-root/
 │   │   ├── integration/ # Integration tests
 │   │   └── unit/        # Unit tests (jika ada)
 │   └── config/          # Konfigurasi environment
-├── tests/               # Playwright test files (spec files)
+├── tests/
+│   ├── helpers/         # Helper functions untuk test (WAJIB)
+│   │   ├── login.helper.ts      # Login helper (WAJIB digunakan di beforeEach)
+│   │   ├── auth.setup.ts        # Authentication setup untuk storage state
+│   │   └── index.ts            # Central export untuk semua helpers
+│   ├── e2e/            # End-to-end tests
+│   ├── integration/     # Integration tests
+│   ├── unit/           # Unit tests (jika ada)
+│   └── .auth/            # Storage state (di-ignore dari git)
 ├── playwright.config.ts
 ├── tsconfig.json
 ├── package.json
@@ -122,6 +130,52 @@ export class LoginPage {
 8. **Test data HARUS terpisah** - Jangan hardcode data di dalam test
 9. **Environment config HARUS terpisah** - Gunakan environment variables untuk config
 10. **Code review HARUS dilakukan** - Semua perubahan harus melalui code review
+11. **Login HARUS menggunakan helper** - Wajib menggunakan `ensureLogin()` dari `tests/helpers/login.helper.ts` di `beforeEach` hook untuk setiap test, KECUALI test scenario login itu sendiri
+
+### Login Helper Rules
+
+#### Wajib Menggunakan Login Helper
+
+Semua test yang membutuhkan autentikasi HARUS menggunakan login helper:
+
+```typescript
+import { ensureLogin } from '../helpers/login.helper';
+
+test.describe('Test Suite', () => {
+    test.beforeEach(async ({ page }) => {
+        // Wajib menggunakan login helper
+        await ensureLogin(page, 'standard');
+    });
+
+    test('test case', async ({ page }) => {
+        // Test logic - user sudah authenticated
+    });
+});
+```
+
+#### Pengecualian
+
+Login helper TIDAK boleh digunakan untuk:
+- Test scenario login itu sendiri (e.g., `login.spec.ts`)
+- Test yang spesifik menguji flow login
+- Test yang membutuhkan user type berbeda di setiap test
+
+#### Anti-Pattern Login
+
+```typescript
+// ❌ DILARANG - Login manual di test
+test.beforeEach(async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const user = getUserFixture('standard');
+    await loginPage.navigate();
+    await loginPage.performLogin(user.username, user.password);
+});
+
+// ✅ BENAR - Menggunakan login helper
+test.beforeEach(async ({ page }) => {
+    await ensureLogin(page, 'standard');
+});
+```
 
 ### Selector Rules
 - **PRIORITY 1**: `data-testid` attribute (e.g., `page.getByTestId('login-button')`)
@@ -144,6 +198,25 @@ test('user can login with valid credentials', async ({ page }) => {
 
   // Assert - Verifikasi hasil
   await loginPage.assertLoginSuccess();
+});
+```
+
+#### Test dengan Login Helper
+
+Test yang membutuhkan autentikasi HARUS menggunakan login helper di `beforeEach`:
+```typescript
+import { ensureLogin } from '../helpers/login.helper';
+
+test.describe('Feature Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    // Arrange - Login menggunakan helper
+    await ensureLogin(page, 'standard');
+  });
+
+  test('user can perform action', async ({ page }) => {
+    // Act - Test logic (user sudah authenticated)
+    // Assert - Verifikasi hasil
+  });
 });
 ```
 
@@ -308,6 +381,26 @@ interface UserData {
 const userData: UserData = { username: 'test', password: '123' };
 ```
 
+#### 11. Login Manual di Test (Wajib Pakai Helper)
+```typescript
+// ❌ DILARANG - Login manual di test (KECUALI test scenario login)
+test.beforeEach(async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const user = getUserFixture('standard');
+    await loginPage.navigate();
+    await loginPage.performLogin(user.username, user.password);
+});
+
+// ✅ BENAR - Menggunakan login helper
+import { ensureLogin } from '../helpers/login.helper';
+
+test.beforeEach(async ({ page }) => {
+    await ensureLogin(page, 'standard');
+});
+```
+
+**Catatan**: Login helper TIDAK boleh digunakan untuk test scenario login itu sendiri (e.g., `login.spec.ts`).
+
 ---
 
 ## 🎯 Best Practices Summary
@@ -323,6 +416,7 @@ const userData: UserData = { username: 'test', password: '123' };
 - Gunakan TypeScript strict mode
 - Follow naming conventions
 - Tulis dokumentasi untuk public API
+- Gunakan login helper untuk autentikasi di setiap test (kecuali test scenario login)
 
 ### Don'ts ❌
 - Jangan hardcode data di test
@@ -335,6 +429,7 @@ const userData: UserData = { username: 'test', password: '123' };
 - Jangan duplikasi kode
 - Jangan campur business logic di page object
 - Jangan abaikan code review
+- Jangan lakukan login manual di test (kecuali test scenario login)
 
 ---
 
@@ -347,6 +442,6 @@ const userData: UserData = { username: 'test', password: '123' };
 
 ---
 
-**Versi**: 1.0.0  
-**Last Updated**: 2026-03-21  
+**Versi**: 1.0.0
+**Last Updated**: 2026-03-22
 **Maintainer**: Development Team
