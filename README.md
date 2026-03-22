@@ -1,10 +1,10 @@
-# Playwright Template
+# Playwright Saucedemo Automation
 
-> Playwright E2E Testing Framework with TypeScript and Best Practices
+> E2E Testing Framework untuk Saucedemo Swag Labs menggunakan Playwright dan TypeScript
 
 ## 📋 Overview
 
-Template Playwright dengan arsitektur best practice untuk end-to-end testing. Framework ini menggunakan:
+Project ini adalah automation testing untuk [Saucedemo Swag Labs](https://www.saucedemo.com/) menggunakan Playwright dengan arsitektur best practice:
 
 - **Playwright** - Browser automation framework
 - **TypeScript** - Type-safe development
@@ -14,22 +14,22 @@ Template Playwright dengan arsitektur best practice untuk end-to-end testing. Fr
 
 ## 🏗️ Architecture
 
-Project ini mengikuti best practices yang dijelaskan di [`SOUL.md`](./SOUL.md):
-
 ```
 project-root/
 ├── src/
 │   ├── config/          # Environment configuration
-│   ├── fixtures/        # Test data and fixtures
+│   ├── fixtures/        # Test data dan fixtures
 │   ├── pages/           # Page Object Model classes
-│   ├── utils/           # Utility functions
-│   └── tests/           # Test files
+│   │   ├── BasePage.ts           # Base class untuk semua pages
+│   │   ├── SaucedemoLoginPage.ts  # Login page object
+│   │   └── SaucedemoInventoryPage.ts # Inventory page object
+│   └── utils/           # Utility functions
 ├── tests/
-│   ├── e2e/            # End-to-end tests
-│   ├── integration/    # Integration tests
-│   └── unit/           # Unit tests
+│   └── e2e/            # E2E tests untuk Saucedemo
+│       └── saucedemo-login.spec.ts
 ├── playwright.config.ts # Playwright configuration
 ├── tsconfig.json       # TypeScript configuration
+├── .env                # Environment variables
 └── package.json        # Project dependencies
 ```
 
@@ -53,170 +53,238 @@ npx playwright install
 ### Run Tests
 
 ```bash
-# Run all tests
-npm test
+# Run all Saucedemo tests
+npm run test:saucedemo
 
-# Run specific test suite
-npm run test:e2e
-npm run test:integration
-npm run test:unit
-
-# Run with UI mode
-npm run test:ui
+# Run with UI mode (recommended for debugging)
+npx playwright test --ui --project=saucedemo-chromium
 
 # Run with headed mode
-npm run test:headed
+npx playwright test --headed --project=saucedemo-chromium
+
+# Run specific browser
+npm run test:saucedemo:chrome
+npm run test:saucedemo:firefox
+npm run test:saucedemo:webkit
 ```
 
 ## 📝 Available Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm test` | Run all tests |
-| `npm run test:e2e` | Run E2E tests only |
-| `npm run test:integration` | Run integration tests only |
-| `npm run test:unit` | Run unit tests only |
+| `npm run test:saucedemo` | Run Saucedemo tests on Chrome |
+| `npm run test:saucedemo:chrome` | Run Saucedemo tests on Chromium |
+| `npm run test:saucedemo:firefox` | Run Saucedemo tests on Firefox |
+| `npm run test:saucedemo:webkit` | Run Saucedemo tests on WebKit |
 | `npm run test:ui` | Run tests with UI mode |
 | `npm run test:headed` | Run tests with visible browser |
 | `npm run test:debug` | Run tests in debug mode |
 | `npm run test:report` | Show HTML test report |
-| `npm run test:chrome` | Run tests on Chrome only |
-| `npm run test:firefox` | Run tests on Firefox only |
-| `npm run test:webkit` | Run tests on WebKit only |
 | `npm run install:browsers` | Install all browser binaries |
 | `npm run codegen` | Generate test code with Playwright Inspector |
 
-## 📚 Documentation
+## 🧪 Test Coverage
 
-- [`SOUL.md`](./SOUL.md) - Best practices and coding standards
-- [`src/README.md`](./src/README.md) - Source directory documentation
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) - Contributing guidelines
+### Saucedemo Login Tests
 
-## 🎯 Key Features
+Test suite untuk login functionality Saucedemo Swag Labs:
 
-### Page Object Model
+| Test ID | Test Case | Type |
+|---------|-----------|------|
+| TCL-001 | User can login with standard user credentials | Positive |
+| TCL-002 | User cannot login with locked out user | Negative |
+| TCL-003 | User can login with problem user | Positive |
+| TCL-004 | User can login with performance glitch user | Positive |
+| TCL-005 | User can login with error user | Positive |
+| TCL-006 | User can login with visual user | Positive |
+| TCL-007 | Validation error when username is empty | Negative |
+| TCL-008 | Validation error when password is empty | Negative |
+| TCL-009 | User cannot login with invalid password | Negative |
 
-Semua page interactions melalui Page Object classes:
+### Additional Tests
+
+- Login page elements are displayed correctly
+- Login button is enabled when form is valid
+- User can clear form fields
+- Products are displayed after successful login
+
+## 📚 Page Objects
+
+### SaucedemoLoginPage
+
+Page object untuk halaman login Saucedemo.
 
 ```typescript
-import { LoginPage } from '../src/pages';
+import { SaucedemoLoginPage } from '../src/pages';
 
-const loginPage = new LoginPage(page);
+const loginPage = new SaucedemoLoginPage(page);
 await loginPage.navigate();
 await loginPage.performLogin(username, password);
 ```
 
-### Test Data Fixtures
+**Available Methods:**
+- `navigate()` - Navigate to login page
+- `verifyPage()` - Verify login page elements
+- `performLogin(username, password)` - Perform login action
+- `fillLoginForm(username, password)` - Fill login form
+- `fillUsername(username)` - Fill username field
+- `fillPassword(password)` - Fill password field
+- `clickLoginButton()` - Click login button
+- `isLoginButtonEnabled()` - Check if login button is enabled
+- `clearForm()` - Clear all form fields
+- `getUsernameValue()` - Get username field value
+- `getPasswordValue()` - Get password field value
+- `assertErrorMessage(message)` - Assert error message
 
-Test data terpisah dari kode test:
+### SaucedemoInventoryPage
 
-```typescript
-import { getUserFixture } from '../src/fixtures';
-
-const user = getUserFixture('valid');
-```
-
-### Utility Functions
-
-Reusable utilities untuk common operations:
-
-```typescript
-import { generateRandomEmail, formatDate } from '../src/utils';
-
-const email = generateRandomEmail();
-const date = formatDate(new Date());
-```
-
-### Environment Configuration
-
-Environment-specific configuration:
+Page object untuk halaman inventory (dashboard) Saucedemo.
 
 ```typescript
-import { config, Environment } from '../src/config/env.config';
+import { SaucedemoInventoryPage } from '../src/pages';
 
-// Set environment via NODE_ENV
-// NODE_ENV=staging npm test
+const inventoryPage = new SaucedemoInventoryPage(page);
+await inventoryPage.navigate();
+await inventoryPage.verifyPage();
 ```
 
-## 🧪 Test Structure
+**Available Methods:**
+- `navigate()` - Navigate to inventory page
+- `verifyPage()` - Verify inventory page elements
+- `isOnInventoryPage()` - Check if on inventory page
+- `getProductCount()` - Get number of products
+- `getProductTitles()` - Get all product titles
+- `isShoppingCartVisible()` - Check if shopping cart is visible
+- `clickMenuButton()` - Click menu button
+- `clickShoppingCart()` - Click shopping cart
+- `assertUserLoggedIn()` - Assert user is logged in
+- `assertProductsDisplayed()` - Assert products are displayed
+- `assertProductDisplayed(productName)` - Assert specific product is displayed
+- `getPageTitle()` - Get page title
+- `hasVisualIssues()` - Check for visual issues
+- `hasPerformanceIssues()` - Check for performance issues
 
-### E2E Tests
+## 📦 Test Data Fixtures
 
-Tests untuk user flows yang melibatkan multiple pages.
+Test data terpisah dari kode test untuk maintainability:
 
-Location: `tests/e2e/`
+```typescript
+import { getSaucedemoUserFixture, SaucedemoErrorMessages } from '../src/fixtures';
 
-### Integration Tests
+// Get user fixture
+const user = getSaucedemoUserFixture('standard');
 
-Tests untuk integrasi antar components.
+// Available user types:
+// 'standard' - Standard user with valid credentials
+// 'locked' - Locked out user
+// 'problem' - User with visual/product issues
+// 'performance' - User with performance delay
+// 'error' - User that triggers errors
+// 'visual' - User with different UI layout
+// 'invalidPassword' - Valid username with invalid password
+// 'emptyUsername' - Empty username with valid password
+// 'emptyPassword' - Valid username with empty password
 
-Location: `tests/integration/`
+// Error messages
+SaucedemoErrorMessages.LOCKED_OUT
+SaucedemoErrorMessages.USERNAME_REQUIRED
+SaucedemoErrorMessages.PASSWORD_REQUIRED
+SaucedemoErrorMessages.INVALID_CREDENTIALS
+```
 
-### Unit Tests
+## 🎯 Test Structure
 
-Tests untuk utility functions dan helper methods.
+### AAA Pattern
 
-Location: `tests/unit/`
+Semua test mengikuti Arrange-Act-Assert pattern:
 
-## 🎨 Best Practices
+```typescript
+test('TCL-001: user can login with standard user credentials', async ({ page }) => {
+    // Arrange
+    const user = getSaucedemoUserFixture('standard');
 
-Project ini mengikuti best practices dari [`SOUL.md`](./SOUL.md):
+    // Act
+    await loginPage.performLogin(user.username, user.password);
 
-- ✅ Gunakan **Page Object Model**
-- ✅ Gunakan **data-testid** sebagai selector utama
-- ✅ Buat test yang **independent** dan **focused**
-- ✅ Pisahkan **test data** dari kode test
-- ✅ Gunakan **timeout** yang wajar dan eksplisit
-- ✅ Tulis **assertion** yang spesifik
-- ✅ Handle **error** dengan pesan yang jelas
-- ✅ Gunakan **TypeScript strict mode**
-- ✅ Follow **naming conventions**
+    // Assert
+    await inventoryPage.verifyPage();
+    await expect(page).toHaveURL(/.*inventory.html/);
+});
+```
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-Copy `.env.example` ke `.env` dan sesuaikan:
+File `.env` berisi konfigurasi environment:
 
-```bash
-cp .env.example .env
+```env
+# Playwright Configuration
+BASE_URL=https://www.saucedemo.com
+CI=false
 ```
 
 ### Playwright Config
 
-Edit [`playwright.config.ts`](./playwright.config.ts) untuk mengubah:
+[`playwright.config.ts`](./playwright.config.ts) mengkonfigurasi:
 
-- Base URL
-- Timeout values
-- Browser configurations
-- Reporter settings
+- **Base URL**: https://www.saucedemo.com
+- **Timeout**: 30 detik untuk test, 5 detik untuk assertion
+- **Browsers**: Chromium, Firefox, WebKit
+- **Projects**: saucedemo-chromium, saucedemo-firefox, saucedemo-webkit
+- **Reporters**: HTML, List, JSON
 
-### TypeScript Config
+### Saucedemo Projects
 
-Edit [`tsconfig.json`](./tsconfig.json) untuk mengubah:
-
-- Compiler options
-- Type checking rules
-- Include/exclude paths
+```typescript
+{
+    name: 'saucedemo-chromium',
+    testMatch: /.*saucedemo.*/,
+    use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.saucedemo.com',
+    },
+}
+```
 
 ## 🐛 Debugging
 
-### Debug Mode
-
-```bash
-npm run test:debug
-```
-
 ### UI Mode
 
+UI Mode memungkinkan Anda untuk:
+
+- Time travel melalui test execution
+- Live debugging locator
+- Lihat network requests
+- Inspect console logs
+- Lihat screenshots di setiap step
+
 ```bash
-npm run test:ui
+npx playwright test --ui --project=saucedemo-chromium
+```
+
+### Debug Mode
+
+Debug mode dengan breakpoints:
+
+```bash
+npm run test:debug -- --project=saucedemo-chromium
 ```
 
 ### Headed Mode
 
+Jalankan test dengan browser yang terlihat:
+
 ```bash
-npm run test:headed
+npm run test:headed -- --project=saucedemo-chromium
+```
+
+### Codegen
+
+Generate test code dengan Playwright Inspector:
+
+```bash
+npm run codegen
 ```
 
 ## 📊 Reports
@@ -227,19 +295,55 @@ npm run test:headed
 npm run test:report
 ```
 
+Report HTML akan terbuka di browser dengan detail:
+- Test results
+- Screenshots (on failure)
+- Videos (on failure)
+- Traces (on retry)
+- Timeline view
+
 ### JSON Report
 
 JSON report disimpan di `test-results/results.json`
 
-## 🤝 Contributing
+## 🎨 Best Practices
 
-Lihat [`CONTRIBUTING.md`](./CONTRIBUTING.md) untuk panduan berkontribusi.
+Project ini mengikuti best practices:
+
+- ✅ Gunakan **Page Object Model**
+- ✅ Gunakan selector yang stabil (class, data-test attributes)
+- ✅ Buat test yang **independent** dan **focused**
+- ✅ Pisahkan **test data** dari kode test
+- ✅ Gunakan **timeout** yang wajar dan eksplisit
+- ✅ Tulis **assertion** yang spesifik
+- ✅ Handle **error** dengan pesan yang jelas
+- ✅ Gunakan **TypeScript strict mode**
+- ✅ Follow **naming conventions**
+- ✅ Gunakan **AAA pattern** (Arrange-Act-Assert)
+
+## 🌐 Saucedemo Selectors
+
+Saucedemo.com menggunakan selector berikut:
+
+| Element | Selector |
+|---------|----------|
+| Username input | `[data-test="username"]` |
+| Password input | `[data-test="password"]` |
+| Login button | `[data-test="login-button"]` |
+| Error message | `[data-test="error"]` |
+| Login container | `.login_container` |
+| Login logo | `.login_logo` |
+| Header container | `.header_container` |
+| Shopping cart | `.shopping_cart_link` |
+| Product list | `.inventory_list` |
+| Product title | `.inventory_item_name` |
 
 ## 📖 References
 
+- [Saucedemo Swag Labs](https://www.saucedemo.com/)
 - [Playwright Documentation](https://playwright.dev/docs/intro)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Best Practices](./SOUL.md)
+- [Page Object Model](https://playwright.dev/docs/pom)
 
 ## 📄 License
 
@@ -248,4 +352,4 @@ ISC
 ---
 
 **Versi**: 1.0.0
-**Last Updated**: 2026-03-21
+**Last Updated**: 2026-03-22
