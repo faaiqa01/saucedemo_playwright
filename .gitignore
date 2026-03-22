@@ -46,3 +46,4 @@ temp/
 *.tmp
 html/
 test_scenario/
+.roo
