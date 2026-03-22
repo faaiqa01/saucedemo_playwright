@@ -1,0 +1,39 @@
+{
+  "name": "playwright-template",
+  "version": "1.0.0",
+  "description": "Playwright E2E Testing Template with Best Practices",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test tests/e2e",
+    "test:integration": "playwright test tests/integration",
+    "test:unit": "playwright test tests/unit",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=\"Mobile Chrome\"",
+    "install:browsers": "playwright install",
+    "install:chrome": "playwright install chromium",
+    "install:firefox": "playwright install firefox",
+    "install:webkit": "playwright install webkit",
+    "codegen": "playwright codegen",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "testing",
+    "automation",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0"
+  }
+}
