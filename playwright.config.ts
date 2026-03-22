@@ -99,15 +99,33 @@ export default defineConfig({
             name: 'Mobile Safari',
             use: { ...devices['iPhone 12'] },
         },
-    ],
 
-    // Run your local dev server before starting the tests
-    webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000, // 2 menit
-    },
+        // Saucedemo configuration
+        {
+            name: 'saucedemo-chromium',
+            testMatch: /.*saucedemo.*/,
+            use: {
+                ...devices['Desktop Chrome'],
+                baseURL: 'https://www.saucedemo.com',
+            },
+        },
+        {
+            name: 'saucedemo-firefox',
+            testMatch: /.*saucedemo.*/,
+            use: {
+                ...devices['Desktop Firefox'],
+                baseURL: 'https://www.saucedemo.com',
+            },
+        },
+        {
+            name: 'saucedemo-webkit',
+            testMatch: /.*saucedemo.*/,
+            use: {
+                ...devices['Desktop Safari'],
+                baseURL: 'https://www.saucedemo.com',
+            },
+        },
+    ],
 
     // Output directory for test artifacts
     outputDir: 'test-results',
