@@ -5,3 +5,4 @@
  */
 
 export * from './saucedemo.fixture';
+export * from './product.fixture';

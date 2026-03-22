@@ -44,6 +44,6 @@ screenshots/
 tmp/
 temp/
 *.tmp
-html/
+html
 test_scenario/
 .roo
