@@ -224,6 +224,15 @@ export class SaucedemoInventoryPage extends BasePage {
     }
 
     /**
+     * Click on product name to navigate to detail page
+     * @param productName - Name of product
+     */
+    async clickProductName(productName: string): Promise<void> {
+        const productLocator = this.locProductTitle.filter({ hasText: productName });
+        await this.clickElement(productLocator);
+    }
+
+    /**
      * Get product price
      * @param productName - Name of the product
      */

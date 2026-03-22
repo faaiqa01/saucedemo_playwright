@@ -8,3 +8,4 @@
 export { BasePage } from './BasePage';
 export { SaucedemoLoginPage } from './SaucedemoLoginPage';
 export { SaucedemoInventoryPage } from './SaucedemoInventoryPage';
+export { SaucedemoDetailProductPage } from './SaucedemoDetailProductPage';
